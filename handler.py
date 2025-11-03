@@ -4,20 +4,18 @@ import os
 import subprocess
 import time
 import uuid
-
 import requests
 import runpod
-
 
 def start_comfyui_server():
     """Start the ComfyUI server"""
     print("Starting ComfyUI server...")
     process = subprocess.Popen(
-        ['python3', '/app/ComfyUI/main.py', '--listen', '0.0.0.0', '--port', '8188'],
+        ['python3', '/comfyui/main.py', '--listen', '0.0.0.0', '--port', '8188'],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.STDOUT
     )
-
+    
     # Wait for server to be ready
     max_attempts = 30
     for i in range(max_attempts):
@@ -29,14 +27,12 @@ def start_comfyui_server():
         except requests.RequestException:
             pass
         time.sleep(2)
-
+    
     process.terminate()
     raise Exception("ComfyUI server failed to start")
 
-
 # Start the server when module loads
 comfyui_process = start_comfyui_server()
-
 
 def queue_workflow(workflow):
     """Queue a workflow in ComfyUI"""
@@ -48,7 +44,6 @@ def queue_workflow(workflow):
     if response.status_code != 200:
         raise Exception(f"Failed to queue workflow: {response.text}")
     return response.json()
-
 
 def wait_for_completion(prompt_id, timeout=300):
     """Wait for workflow completion and get results"""
@@ -62,7 +57,6 @@ def wait_for_completion(prompt_id, timeout=300):
         time.sleep(1)
     raise Exception(f"Workflow timed out after {timeout} seconds")
 
-
 def get_images_from_outputs(outputs):
     """Extract images from workflow outputs"""
     images = []
@@ -71,15 +65,14 @@ def get_images_from_outputs(outputs):
             for image_info in node_output['images']:
                 filename = image_info['filename']
                 subfolder = image_info.get('subfolder', '')
-                
-                image_path = f"/app/ComfyUI/output/{subfolder}/{filename}" if subfolder else f"/app/ComfyUI/output/{filename}"
+                # Updated path to /comfyui
+                image_path = f"/comfyui/output/{subfolder}/{filename}" if subfolder else f"/comfyui/output/{filename}"
                 
                 if os.path.exists(image_path):
                     with open(image_path, 'rb') as f:
                         image_data = base64.b64encode(f.read()).decode('utf-8')
                         images.append({'filename': filename, 'data': image_data})
     return images
-
 
 def handler(event):
     """
@@ -92,7 +85,6 @@ def handler(event):
     """
     try:
         workflow = event.get("input", {}).get("workflow")
-        
         if not workflow:
             raise ValueError("Missing 'workflow' in input")
         
@@ -110,11 +102,9 @@ def handler(event):
             "status": "success",
             "images": images
         }
-    
     except Exception as e:
         print(f"Error: {str(e)}")
         return {"error": str(e), "status": "failed"}
-
 
 if __name__ == "__main__":
     print("Starting RunPod handler...")
