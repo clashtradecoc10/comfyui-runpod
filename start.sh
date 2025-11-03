@@ -15,6 +15,7 @@ CANDIDATES=(
   "/mnt/ComfyUI"
 )
 
+
 COMFY_PATH=""
 
 # Try to find the correct ComfyUI directory
