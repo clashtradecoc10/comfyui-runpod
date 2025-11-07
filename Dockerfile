@@ -6,6 +6,7 @@ RUN mkdir -p /comfyui/models/checkpoints \
              /comfyui/models/vae \
              /comfyui/models/upscale_models \
              /comfyui/models/ultralytics/bbox \
+             /comfyui/models/sams \
              /comfyui/custom_nodes
 
 # Copy your scripts
@@ -24,6 +25,10 @@ RUN comfy model download \
     --url "https://civitai.com/api/download/models/2334591?type=Model&format=SafeTensor&size=pruned&fp=fp16" \
     --relative-path models/checkpoints \
     --filename cyberrealistic_pony.safetensors
+
+# 🎭 Download SAM model for FaceDetailer
+RUN wget -P /comfyui/models/sams \
+    https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth
 
 # 🧩 Install ComfyUI Impact Pack
 RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack /comfyui/custom_nodes/ComfyUI-Impact-Pack && \
