@@ -1,4 +1,4 @@
-FROM runpod/worker-comfyui:5.5.0-base
+FROM runpod/worker-comfyui:3.6.0-base
 
 # Create all necessary directories
 RUN mkdir -p /comfyui/models/checkpoints \
